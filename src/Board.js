@@ -10,7 +10,7 @@ function isWordInList(palabra, listaPalabras) {
   }
 }
 
-export default function Board({ listaPalabras }) {
+export default function Board({ listaPalabras, onEnter }) {
   const [palabra, setPalabra] = useState(() => {
     const idx = Math.floor(Math.random() * palabrasAcertables.length);
     return palabrasAcertables[idx].toUpperCase();
@@ -148,6 +148,7 @@ export default function Board({ listaPalabras }) {
               setIsSuccess(true);
               setShowMessage(true);
               setContador(c => c + 1);
+              onEnter(typedWord);
               return;
             } else if (!isWordInList(typedWord, listaPalabras)) {
               setMessage("Palabra no válida");
@@ -156,6 +157,7 @@ export default function Board({ listaPalabras }) {
               setTimeout(() => {
                 setShowMessage(false);
               }, 2500);
+              onEnter(typedWord);
               return;
             }
             setCurrentRow((prev) => prev + 1);
@@ -164,8 +166,10 @@ export default function Board({ listaPalabras }) {
               setIsSuccess(false);
               setShowMessage(true);
               setGameEnded(true);
+              onEnter(typedWord);
               return;
             }
+            onEnter(typedWord);
           }
         }
 
@@ -190,7 +194,7 @@ export default function Board({ listaPalabras }) {
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  });
+  }, [onEnter, listaPalabras, palabra]);
   return (
     <div className="board-container">
       {showMessage && isSuccess && (
@@ -252,6 +256,7 @@ export default function Board({ listaPalabras }) {
           setCurrentRow(0);
           const idx = Math.floor(Math.random() * palabrasAcertables.length);
           setPalabra(palabrasAcertables[idx].toUpperCase());
+          onEnter("");
         }}>
           Siguiente
         </button>
@@ -269,6 +274,7 @@ export default function Board({ listaPalabras }) {
             const idx = Math.floor(Math.random() * palabrasAcertables.length);
             setPalabra(palabrasAcertables[idx].toUpperCase());
             setGameEnded(false);
+            onEnter("");
           }}>
             Reiniciar
           </button>

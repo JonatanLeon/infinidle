@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
-import App from './App';
+import Container from './Container';
 import reportWebVitals from './reportWebVitals';
 import palabrasJugables from "./data/palabras_plus.json";
 import 'bootstrap/dist/css/bootstrap.css';
@@ -10,7 +10,7 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 const listaPalabras = palabrasJugables;
 root.render(
   <React.StrictMode>
-    <App listaPalabras={listaPalabras} />
+    <Container listaPalabras={listaPalabras} />
   </React.StrictMode>
 );
 
