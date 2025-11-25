@@ -10,36 +10,73 @@ function isWordInList(palabra, listaPalabras) {
   }
 }
 
-export default function Board({ listaPalabras, onEnter }) {
+export default function Board({ listaPalabras, onEnter, onReset }) {
+  const loadState = (key, defaultValue) => {
+    const saved = localStorage.getItem(key);
+    return saved ? JSON.parse(saved) : defaultValue;
+  };
+
   const [palabra, setPalabra] = useState(() => {
+    const saved = localStorage.getItem("palabra");
+    if (saved) return JSON.parse(saved);
     const idx = Math.floor(Math.random() * palabrasAcertables.length);
     return palabrasAcertables[idx].toUpperCase();
   });
-  const [contador, setContador] = useState(0);
-  const [squares, setSquares] = useState(Array(30).fill(""));
-  const [currentRow, setCurrentRow] = useState(0);
-  const [message, setMessage] = useState("");
-  const [showMessage, setShowMessage] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
-  const [gameEnded, setGameEnded] = useState(false);
+  const [contador, setContador] = useState(() => loadState("contador", 0));
+  const [squares, setSquares] = useState(() => loadState("squares", Array(30).fill("")));
+  const [currentRow, setCurrentRow] = useState(() => loadState("currentRow", 0));
+  const [message, setMessage] = useState(() => loadState("message", ""));
+  const [showMessage, setShowMessage] = useState(() => loadState("showMessage", false));
+  const [isSuccess, setIsSuccess] = useState(() => loadState("isSuccess", false));
+  const [gameEnded, setGameEnded] = useState(() => loadState("gameEnded", false));
+
+  // Refs sincronizados
   const gameEndedRef = useRef(gameEnded);
   const squaresRef = useRef(squares);
   const currentRowRef = useRef(currentRow);
 
-  const [colorRows, setColorRows] = useState(
-    Array(6).fill(null).map(() => Array(5).fill(""))
+  const [colorRows, setColorRows] = useState(() => loadState("colorRows",
+    Array(6).fill(null).map(() => Array(5).fill("")))
   );
+  // Guardar cada vez que cambie el estado
   useEffect(() => {
+    localStorage.setItem("palabra", JSON.stringify(palabra));
+  }, [palabra]);
+
+  useEffect(() => {
+    localStorage.setItem("contador", JSON.stringify(contador));
+  }, [contador]);
+
+  useEffect(() => {
+    localStorage.setItem("squares", JSON.stringify(squares));
     squaresRef.current = squares;
   }, [squares]);
 
   useEffect(() => {
+    localStorage.setItem("currentRow", JSON.stringify(currentRow));
     currentRowRef.current = currentRow;
   }, [currentRow]);
 
   useEffect(() => {
+    localStorage.setItem("message", JSON.stringify(message));
+  }, [message]);
+
+  useEffect(() => {
+    localStorage.setItem("showMessage", JSON.stringify(showMessage));
+  }, [showMessage]);
+
+  useEffect(() => {
+    localStorage.setItem("isSuccess", JSON.stringify(isSuccess));
+  }, [isSuccess]);
+
+  useEffect(() => {
+    localStorage.setItem("gameEnded", JSON.stringify(gameEnded));
     gameEndedRef.current = gameEnded;
   }, [gameEnded]);
+
+  useEffect(() => {
+    localStorage.setItem("colorRows", JSON.stringify(colorRows));
+  }, [colorRows]);
 
   useEffect(() => {
 
@@ -157,7 +194,6 @@ export default function Board({ listaPalabras, onEnter }) {
               setTimeout(() => {
                 setShowMessage(false);
               }, 2500);
-              onEnter(typedWord);
               return;
             }
             setCurrentRow((prev) => prev + 1);
@@ -257,29 +293,30 @@ export default function Board({ listaPalabras, onEnter }) {
           const idx = Math.floor(Math.random() * palabrasAcertables.length);
           setPalabra(palabrasAcertables[idx].toUpperCase());
           onEnter("");
+          onReset(true);
         }}>
           Siguiente
         </button>
       )}
-
+      <div>
+        <button className="reset" onClick={() => {
+          setContador(0);
+          setColorRows(Array(6).fill(null).map(() => Array(5).fill("")));
+          setSquares(Array(30).fill(""));
+          setIsSuccess(false);
+          setShowMessage(false);
+          setCurrentRow(0);
+          const idx = Math.floor(Math.random() * palabrasAcertables.length);
+          setPalabra(palabrasAcertables[idx].toUpperCase());
+          setGameEnded(false);
+          onEnter("");
+          onReset(true);
+        }}>
+          Reiniciar
+        </button>
+      </div>
       {showMessage && !isSuccess && gameEnded && (
-        <div>
-          <button className="btn btn-primary" onClick={() => {
-            setContador(0);
-            setColorRows(Array(6).fill(null).map(() => Array(5).fill("")));
-            setSquares(Array(30).fill(""));
-            setIsSuccess(false);
-            setShowMessage(false);
-            setCurrentRow(0);
-            const idx = Math.floor(Math.random() * palabrasAcertables.length);
-            setPalabra(palabrasAcertables[idx].toUpperCase());
-            setGameEnded(false);
-            onEnter("");
-          }}>
-            Reiniciar
-          </button>
-          <p>La palabra era: {palabra}</p>
-        </div>
+        <p>La palabra era: {palabra}</p>
       )}
     </div >
   );

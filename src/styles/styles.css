@@ -131,6 +131,22 @@ body {
     text-align: center;
 }
 
+.reset {
+    position: fixed;
+    /* se fija respecto a la ventana */
+    bottom: 20px;
+    /* separación desde abajo */
+    right: 20px;
+    /* separación desde la derecha */
+    padding: 10px 20px;
+    background-color: #2269ec;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+
+}
+
 .keyboard-container {
     margin-top: 20px;
     display: flex;

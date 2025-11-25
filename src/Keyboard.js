@@ -1,5 +1,5 @@
-import "./styles/styles.css"
-import { useState } from 'react';
+import "./styles/styles.css";
+import { useState, useEffect } from "react";
 
 const teclado = [
     ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
@@ -7,21 +7,37 @@ const teclado = [
     ["Z", "X", "C", "V", "B", "N", "M"]
 ];
 
-let storedKeys = [];
+export default function Keyboard({ highlightedKeys, resetPressed }) {
+    const loadState = (key, defaultValue) => {
+        const saved = localStorage.getItem(key);
+        return saved ? JSON.parse(saved) : defaultValue;
+    };
+    const [keyboard] = useState(() => loadState("keyboard", teclado));
+    const [storedKeys, setStoredKeys] = useState(() => loadState("storedKeys", []));
 
-export default function Keyboard({ highlightedKeys }) {
-    const [keyboard] = useState(teclado);
-    console.log("highlightedKeys", highlightedKeys);
-    if (highlightedKeys.length > 0) {
-        for (let i = 0; i < highlightedKeys.length; i++) {
-            if (!storedKeys.includes(highlightedKeys.charAt(i))) {
-                storedKeys.push(highlightedKeys.charAt(i));
-            }
-        }
-    } else {
-        storedKeys = [];
-    }
-    console.log("storedKeys", storedKeys);
+    useEffect(() => {
+        localStorage.setItem("keyboard", JSON.stringify(keyboard));
+    }, [keyboard]);
+
+    useEffect(() => {
+        if (highlightedKeys && highlightedKeys.length > 0) {
+            setStoredKeys(prev => {
+                const nuevas = [...prev];
+                for (let i = 0; i < highlightedKeys.length; i++) {
+                    const letra = highlightedKeys.charAt(i);
+                    if (!nuevas.includes(letra)) {
+                        nuevas.push(letra);
+                    }
+                }
+                return nuevas;
+            });
+        } else if (resetPressed) setStoredKeys([]);
+    }, [highlightedKeys, resetPressed]);
+
+
+    useEffect(() => {
+        localStorage.setItem("storedKeys", JSON.stringify(storedKeys));
+    }, [storedKeys]);
     return (
         <div className="keyboard-container">
             <div className="keyboard">
@@ -30,7 +46,8 @@ export default function Keyboard({ highlightedKeys }) {
                         {row.map((letter, keyIndex) => (
                             <div
                                 key={keyIndex}
-                                className={`key ${storedKeys.includes(letter) ? "dark" : ""}`}>
+                                className={`key ${storedKeys.includes(letter) ? "dark" : ""}`}
+                            >
                                 {letter}
                             </div>
                         ))}
@@ -40,4 +57,3 @@ export default function Keyboard({ highlightedKeys }) {
         </div>
     );
 }
-
