@@ -179,6 +179,11 @@ export default function Board({ listaPalabras, onEnter, onReset }) {
               });
             }
 
+            const mapColors = [];
+            for (let i = 0; i < typedWord.length; i++) {
+              mapColors.push([typedWord.charAt(i), colorNumbersRow[i]]);
+            }
+            console.log("mapColors", mapColors);
             setShowMessage(false);
             if (isValidWord) {
               setMessage("Palabra correcta");
@@ -233,6 +238,9 @@ export default function Board({ listaPalabras, onEnter, onReset }) {
   }, [onEnter, listaPalabras, palabra]);
   return (
     <div className="board-container">
+      <div className="title">
+        <p>Infinidle</p>
+      </div>
       {showMessage && isSuccess && (
         <div className="success-message">
           {message}

@@ -1,7 +1,7 @@
 import "./styles/styles.css"
 import Board from './Board';
 import Keyboard from './Keyboard';
-import { use, useState } from "react";
+import { useState } from "react";
 
 export default function Container({ listaPalabras }) {
     const [highlightedKeys, setHighlightedKeys] = useState([]);
