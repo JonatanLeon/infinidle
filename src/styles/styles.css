@@ -123,3 +123,13 @@
     background-color: #333;
     color: #fff;
 }
+
+.key.yellow {
+    background-color: #fcca57;
+    color: #fff;
+}
+
+.key.green {
+    background-color: #76b157;
+    color: #fff;
+}

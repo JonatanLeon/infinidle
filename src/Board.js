@@ -30,7 +30,6 @@ export default function Board({ listaPalabras, onEnter, onReset }) {
   const [isSuccess, setIsSuccess] = useState(() => loadState("isSuccess", false));
   const [gameEnded, setGameEnded] = useState(() => loadState("gameEnded", false));
 
-  // Refs sincronizados
   const gameEndedRef = useRef(gameEnded);
   const squaresRef = useRef(squares);
   const currentRowRef = useRef(currentRow);
@@ -38,7 +37,7 @@ export default function Board({ listaPalabras, onEnter, onReset }) {
   const [colorRows, setColorRows] = useState(() => loadState("colorRows",
     Array(6).fill(null).map(() => Array(5).fill("")))
   );
-  // Guardar cada vez que cambie el estado
+
   useEffect(() => {
     localStorage.setItem("palabra", JSON.stringify(palabra));
   }, [palabra]);
@@ -181,16 +180,16 @@ export default function Board({ listaPalabras, onEnter, onReset }) {
 
             const mapColors = [];
             for (let i = 0; i < typedWord.length; i++) {
-              mapColors.push([typedWord.charAt(i), colorNumbersRow[i]]);
+              const letraColor = { name: typedWord.charAt(i), value: parseInt(colorNumbersRow[i]) };
+              mapColors.push(letraColor)
             }
-            console.log("mapColors", mapColors);
             setShowMessage(false);
             if (isValidWord) {
               setMessage("Palabra correcta");
               setIsSuccess(true);
               setShowMessage(true);
               setContador(c => c + 1);
-              onEnter(typedWord);
+              onEnter(mapColors);
               return;
             } else if (!isWordInList(typedWord, listaPalabras)) {
               setMessage("Palabra no válida");
@@ -207,10 +206,10 @@ export default function Board({ listaPalabras, onEnter, onReset }) {
               setIsSuccess(false);
               setShowMessage(true);
               setGameEnded(true);
-              onEnter(typedWord);
+              onEnter(mapColors);
               return;
             }
-            onEnter(typedWord);
+            onEnter(mapColors);
           }
         }
 
@@ -260,10 +259,13 @@ export default function Board({ listaPalabras, onEnter, onReset }) {
               const num = numStr;
 
               let bgColor;
-              if (num === "0") bgColor = "gray";
-              if (num === "1") bgColor = "green";
-              if (num === "2") bgColor = "yellow";
+              let fontColor;
+              if (num === "0") bgColor = "#2f373a";
+              if (num === "1") bgColor = "#76b157";
+              if (num === "2") bgColor = "#fcca57";
               if (num === "") bgColor = "lightgray";
+              if (num === "0" || num === "1" || num === "2") fontColor = "#fff";
+              else fontColor = "#000000ff";
 
               const letter = squares[rowIndex * 5 + squareIndex];
               return (
@@ -278,6 +280,7 @@ export default function Board({ listaPalabras, onEnter, onReset }) {
                     alignItems: "center",
                     justifyContent: "center",
                     fontSize: "24px",
+                    color: fontColor,
                     border: "1px solid #333",
                     borderColor: rowIndex === currentRow ? "blue" : "#333",
                     backgroundColor: bgColor,
