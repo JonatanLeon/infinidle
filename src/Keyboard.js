@@ -10,13 +10,13 @@ const teclado = [
 export default function Keyboard({ highlightedKeys, resetPressed }) {
 
     const loadState = (key, defaultValue) => {
-        const saved = sessionStorage.getItem(key);
+        const saved = localStorage.getItem(key);
         return saved ? JSON.parse(saved) : defaultValue;
     };
     const [keyboard] = useState(() => loadState("keyboard", teclado));
     const [storedKeys, setStoredKeys] = useState(() => loadState("storedKeys", {}));
     useEffect(() => {
-        sessionStorage.setItem("keyboard", JSON.stringify(keyboard));
+        localStorage.setItem("keyboard", JSON.stringify(keyboard));
     }, [keyboard]);
 
     useEffect(() => {
@@ -37,7 +37,7 @@ export default function Keyboard({ highlightedKeys, resetPressed }) {
         } else if (resetPressed) setStoredKeys({});
     }, [highlightedKeys, resetPressed]);
     useEffect(() => {
-        sessionStorage.setItem("storedKeys", JSON.stringify(storedKeys));
+        localStorage.setItem("storedKeys", JSON.stringify(storedKeys));
     }, [storedKeys]);
 
     return (
