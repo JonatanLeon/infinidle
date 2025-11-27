@@ -26,9 +26,11 @@ export default function Keyboard({ highlightedKeys, resetPressed }) {
                 for (let i = 0; i < highlightedKeys.length; i++) {
                     const letra = highlightedKeys[i].name;
                     const numero = highlightedKeys[i].value;
-                    if (!Object.hasOwn(nuevas, letra)) {
+                    if (Object.hasOwn(nuevas, letra) && nuevas[letra] === 0 && numero > 0) {
                         nuevas[letra] = numero;
-                    } else if (nuevas[letra] === 0 && numero > 0) {
+                    } else if (Object.hasOwn(nuevas, letra) && nuevas[letra] > numero) {
+                        nuevas[letra] = numero;
+                    } else if (!Object.hasOwn(nuevas, letra)) {
                         nuevas[letra] = numero;
                     }
                 }
