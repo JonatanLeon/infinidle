@@ -1,5 +1,5 @@
 import "./styles/styles.css"
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useReducer } from 'react';
 import palabrasAcertables from "./data/palabras.json";
 
 function isWordInList(palabra, listaPalabras) {
@@ -8,6 +8,35 @@ function isWordInList(palabra, listaPalabras) {
   } else {
     return false;
   }
+}
+
+function Notification({ message, type, onClose }) {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      onClose();
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [onClose]);
+
+  return (
+    <div
+      className={`notification ${type}`}
+      style={{
+        position: "fixed",
+        top: "20px",
+        right: "20px",
+        padding: "10px 20px",
+        borderRadius: "5px",
+        color: "#fff",
+        backgroundColor: type === "success" ? "#28a745" : "#dc3545",
+        boxShadow: "0px 4px 6px rgba(0,0,0,0.2)",
+        zIndex: 1000,
+        textAlign: "center"
+      }}
+    >
+      {message}
+    </div>
+  );
 }
 
 export default function Board({ listaPalabras, onEnter, onReset }) {
@@ -22,11 +51,13 @@ export default function Board({ listaPalabras, onEnter, onReset }) {
     const idx = Math.floor(Math.random() * palabrasAcertables.length);
     return palabrasAcertables[idx].toUpperCase();
   });
+  console.log("palabra", palabra);
   const [contador, setContador] = useState(() => loadState("contador", 0));
   const [squares, setSquares] = useState(() => loadState("squares", Array(30).fill("")));
   const [currentRow, setCurrentRow] = useState(() => loadState("currentRow", 0));
   const [message, setMessage] = useState(() => loadState("message", ""));
   const [showMessage, setShowMessage] = useState(() => loadState("showMessage", false));
+  const [enableButton, setEnableButton] = useState(() => loadState("enableButton", false));
   const [isSuccess, setIsSuccess] = useState(() => loadState("isSuccess", false));
   const [gameEnded, setGameEnded] = useState(() => loadState("gameEnded", false));
 
@@ -188,6 +219,7 @@ export default function Board({ listaPalabras, onEnter, onReset }) {
               setMessage("Palabra correcta");
               setIsSuccess(true);
               setShowMessage(true);
+              setEnableButton(true);
               setContador(c => c + 1);
               onEnter(mapColors);
               return;
@@ -240,66 +272,73 @@ export default function Board({ listaPalabras, onEnter, onReset }) {
       <div className="title">
         <p>Infinidle</p>
       </div>
-      {showMessage && isSuccess && (
-        <div className="success-message">
-          {message}
-        </div>
+      {showMessage && (
+        <Notification
+          message={message}
+          type={isSuccess ? "success" : "failure"}
+          onClose={() => setShowMessage(false)}
+        />
       )}
+      <div className="grid-container">
+        <div className="grid">
+          {colorRows.map((row, rowIndex) => (
+            <div className="board-row" key={rowIndex}>
+              {row.map((numStr, squareIndex) => {
+                const num = numStr;
 
-      {showMessage && !isSuccess && (
-        <div className="failure-message">
-          {message}
+                let bgColor;
+                let fontColor;
+                if (num === "0") bgColor = "#2f373a";
+                if (num === "1") bgColor = "#76b157";
+                if (num === "2") bgColor = "#fcca57";
+                if (num === "") bgColor = "lightgray";
+                if (num === "0" || num === "1" || num === "2") fontColor = "#fff";
+                else fontColor = "#000000ff";
+
+                const letter = squares[rowIndex * 5 + squareIndex];
+                return (
+                  <div
+                    className="square"
+                    key={squareIndex}
+                    style={{
+                      width: "60px",
+                      height: "60px",
+                      margin: "5px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: "24px",
+                      color: fontColor,
+                      border: "1px solid #333",
+                      borderColor: rowIndex === currentRow ? "blue" : "#333",
+                      backgroundColor: bgColor,
+                    }}
+                  >
+                    {letter}
+                  </div>
+                );
+              })}
+            </div>
+          ))}
         </div>
-      )}
-
-      <div className="grid">
-        {colorRows.map((row, rowIndex) => (
-          <div className="board-row" key={rowIndex}>
-            {row.map((numStr, squareIndex) => {
-              const num = numStr;
-
-              let bgColor;
-              let fontColor;
-              if (num === "0") bgColor = "#2f373a";
-              if (num === "1") bgColor = "#76b157";
-              if (num === "2") bgColor = "#fcca57";
-              if (num === "") bgColor = "lightgray";
-              if (num === "0" || num === "1" || num === "2") fontColor = "#fff";
-              else fontColor = "#000000ff";
-
-              const letter = squares[rowIndex * 5 + squareIndex];
-              return (
-                <div
-                  className="square"
-                  key={squareIndex}
-                  style={{
-                    width: "60px",
-                    height: "60px",
-                    margin: "5px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: "24px",
-                    color: fontColor,
-                    border: "1px solid #333",
-                    borderColor: rowIndex === currentRow ? "blue" : "#333",
-                    backgroundColor: bgColor,
-                  }}
-                >
-                  {letter}
-                </div>
-              );
-            })}
-          </div>
-        ))}
+        <div className="score">
+          <p>Palabras acertadas: </p><h5>{contador}</h5>
+          {
+            !isSuccess && gameEnded && (
+              <p className="extra">La palabra era: {palabra}</p>
+            )
+          }
+        </div>
       </div>
-      <p>Palabras acertadas: </p><h5>{contador}</h5>
-      {showMessage && isSuccess && (
-        <button className="btn btn-primary" onClick={() => {
+      <div className="buttons-container">
+        <button className="next" disabled={enableButton ? "" : "disabled"} style={{
+          backgroundColor: enableButton ? "#76b157" : "#9da09cff",
+          cursor: enableButton ? "pointer" : "initial"
+        }} onClick={() => {
+          // QUIZAS ARREGLAR ESTO PARA QUE SE RESETEE BIEN PORQUE A VECES SE BUGEA
           setColorRows(Array(6).fill(null).map(() => Array(5).fill("")));
           setSquares(Array(30).fill(""));
-          setIsSuccess(false);
-          setShowMessage(false);
+          setEnableButton(false);
           setCurrentRow(0);
           const idx = Math.floor(Math.random() * palabrasAcertables.length);
           setPalabra(palabrasAcertables[idx].toUpperCase());
@@ -308,8 +347,6 @@ export default function Board({ listaPalabras, onEnter, onReset }) {
         }}>
           Siguiente
         </button>
-      )}
-      <div>
         <button className="reset" onClick={() => {
           setContador(0);
           setColorRows(Array(6).fill(null).map(() => Array(5).fill("")));
@@ -322,13 +359,11 @@ export default function Board({ listaPalabras, onEnter, onReset }) {
           setGameEnded(false);
           onEnter("");
           onReset(true);
+          window.location.reload(false);
         }}>
           Reiniciar
         </button>
       </div>
-      {showMessage && !isSuccess && gameEnded && (
-        <p>La palabra era: {palabra}</p>
-      )}
     </div >
   );
 }
